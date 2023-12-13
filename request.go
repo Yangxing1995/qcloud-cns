@@ -31,45 +31,6 @@ func (resp BaseResponse) Error() error {
 	return fmt.Errorf("[%d](%s): %s", resp.Code, resp.CodeDesc, resp.Message)
 }
 
-// 云解析API请求的资源地址
-var (
-	_host     = "cns.api.qcloud.com"
-	_SignHost = _host
-	_uri      = _host + "/v2/index.php"
-	_SignUri  = _uri
-	_scheme   = "https"
-)
-
-func GetHost() string {
-	return _host
-}
-
-// SetHost 设置API请求的域名
-func SetHost(str string) {
-	_host = str
-	_uri = _host + "/v2/index.php"
-}
-
-// SetSignHost 设置API的签名HOST
-func SetSignHost(host string) {
-	_SignHost = host
-	_SignUri = _SignHost + "/v2/index.php"
-}
-
-// SetHost 设置API请求的地址
-func SetUri(str string) {
-	_uri = str
-}
-
-// SetScheme 设置API请求的协议
-func SetScheme(str string) {
-	_scheme = str
-}
-
-func buildUri() string {
-	return _scheme + "://" + _uri
-}
-
 // GET类型的API请求封装
 func (cli *Client) requestGET(action string, param url.Values, respInfo interface{}) error {
 	return cli.request("GET", action, param, nil, respInfo)
@@ -87,10 +48,10 @@ func (cli *Client) request(method, action string, param url.Values, body io.Read
 	param.Set("Nonce", "123456")
 	param.Set("SecretId", cli.SecretId)
 
-	sig := Signature(param, method, _SignUri, cli.SecretKey)
+	sig := Signature(param, method, cli.buildSignUri(), cli.SecretKey)
 	param.Set("Signature", sig)
 
-	req, err := http.NewRequest(method, buildUri()+"?"+param.Encode(), body)
+	req, err := http.NewRequest(method, cli.buildUri()+"?"+param.Encode(), body)
 	if err != nil {
 		return fmt.Errorf("构建请求错误: %s", err)
 	}
