@@ -33,9 +33,11 @@ func (resp BaseResponse) Error() error {
 
 // 云解析API请求的资源地址
 var (
-	_host   = "cns.api.qcloud.com"
-	_uri    = _host + "/v2/index.php"
-	_scheme = "https"
+	_host     = "cns.api.qcloud.com"
+	_SignHost = _host
+	_uri      = _host + "/v2/index.php"
+	_SignUri  = _uri
+	_scheme   = "https"
 )
 
 func GetHost() string {
@@ -46,6 +48,12 @@ func GetHost() string {
 func SetHost(str string) {
 	_host = str
 	_uri = _host + "/v2/index.php"
+}
+
+// SetSignHost 设置API的签名HOST
+func SetSignHost(host string) {
+	_SignHost = host
+	_SignUri = _SignHost + "/v2/index.php"
 }
 
 // SetHost 设置API请求的地址
@@ -79,7 +87,7 @@ func (cli *Client) request(method, action string, param url.Values, body io.Read
 	param.Set("Nonce", "123456")
 	param.Set("SecretId", cli.SecretId)
 
-	sig := Signature(param, method, _uri, cli.SecretKey)
+	sig := Signature(param, method, _SignUri, cli.SecretKey)
 	param.Set("Signature", sig)
 
 	req, err := http.NewRequest(method, buildUri()+"?"+param.Encode(), body)
