@@ -31,6 +31,10 @@ func (cli *Client) SetHost(host string) *Client {
 	return cli
 }
 
+func (cli *Client) GetHost() string {
+	return cli.Host
+}
+
 func (cli *Client) SetScheme(str string) *Client {
 	cli.Scheme = str
 	return cli
